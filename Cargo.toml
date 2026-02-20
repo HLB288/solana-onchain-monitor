@@ -1,0 +1,12 @@
+[package]
+name = "test-fetch-solana-data"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1.0.228", features = ["derive"] }
+solana-client = "3.1.9"
+solana-pubkey = "4.1.0"
+solana-signature = "3.3.0"
+solana-transaction-status = "3.1.9"
+tokio = { version = "1.49.0", features = ["full"] }
