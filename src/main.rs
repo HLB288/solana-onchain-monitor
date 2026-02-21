@@ -13,6 +13,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("new token");
     });
     loop {
+        println!("1 - Get wallet balance");
+        println!("2 - Get wallet transactions");
+        println!("3 - Quit");
         let mut input = String::new();
         std::io::stdin().read_line(&mut input).unwrap();
         match input.trim() {

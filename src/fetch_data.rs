@@ -7,7 +7,7 @@ pub async fn get_balance(address: &str) -> Result<u64, Box<dyn std::error::Error
     let client = RpcClient::new("https://api.mainnet-beta.solana.com");
     let pubkey = address.parse::<Pubkey>()?;
     let balance = client.get_balance(&pubkey)?;
-    println!("balance du wallet: {}", balance as f64 / 1_000_000.0);
+    println!("balance du wallet: {}", balance as f64 / 1_000_000_000.0);
     Ok(balance)
 }
 
