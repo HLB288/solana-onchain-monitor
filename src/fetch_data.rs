@@ -1,7 +1,13 @@
 use solana_client::rpc_client::RpcClient;
+use solana_client::rpc_config::RpcTransactionConfig;
 use solana_pubkey::Pubkey;
 use solana_signature::Signature;
 use solana_transaction_status::UiTransactionEncoding;
+use solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta;
+
+
+
+
 
 pub async fn get_balance(address: &str) -> Result<u64, Box<dyn std::error::Error>> {
     let client = RpcClient::new("https://api.mainnet-beta.solana.com");
@@ -22,4 +28,18 @@ pub async fn get_transaction(address: &str) -> Result<Vec<String>, Box<dyn std::
         results.push(format!("{:?}", tx));
     }
     Ok(results)
+}
+
+pub async fn get_transaction_by_signature(
+    address: &str,
+) -> Result<EncodedConfirmedTransactionWithStatusMeta, Box<dyn std::error::Error>> {
+    let client = RpcClient::new("https://api.mainnet-beta.solana.com");
+    let signature = address.parse::<Signature>()?;
+    let config = RpcTransactionConfig {
+        encoding: Some(UiTransactionEncoding::Json),
+        commitment: None, 
+        max_supported_transaction_version: Some(0),
+    };
+    let tx = client.get_transaction_with_config(&signature, config)?;
+    Ok(tx)
 }
