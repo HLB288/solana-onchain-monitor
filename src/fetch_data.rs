@@ -1,12 +1,12 @@
 use chrono::{DateTime, Utc};
+use mpl_token_metadata::accounts::Metadata;
 use solana_client::rpc_client::RpcClient;
-use solana_client::rpc_config::RpcTransactionConfig; 
+use solana_client::rpc_config::RpcTransactionConfig;
 use solana_client::rpc_response::OptionSerializer;
 use solana_pubkey::Pubkey;
 use solana_signature::Signature;
 use solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta;
 use solana_transaction_status::UiTransactionEncoding;
-use mpl_token_metadata::accounts::Metadata;
 
 pub async fn get_balance(address: &str) -> Result<u64, Box<dyn std::error::Error>> {
     let client = RpcClient::new("https://api.mainnet-beta.solana.com");
@@ -39,29 +39,29 @@ pub async fn get_transaction_by_signature(
         commitment: None,
         max_supported_transaction_version: Some(0),
     };
-    let tx = client.get_transaction_with_config(&signature, config)?;    
+    let tx = client.get_transaction_with_config(&signature, config)?;
 
     if let Some(time) = tx.block_time {
         let datetime = DateTime::<Utc>::from_timestamp(time, 0).unwrap();
-        
+
         // let mint_address = tx.transaction.meta.unwrap().post_token_balances[0].mint()?;
         if let Some(ref meta) = tx.transaction.meta {
             if let OptionSerializer::Some(balances) = &meta.post_token_balances {
                 if let Some(first) = balances.first() {
-                    
                     if first.mint != "So11111111111111111111111111111111111111112" {
                         let mint_pubkey = first.mint.parse::<Pubkey>()?;
-                        let metadata_program_id = "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s".parse::<Pubkey>()?;
+                        let metadata_program_id =
+                            "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s".parse::<Pubkey>()?;
                         let seeds = &[
                             b"metadata" as &[u8],
                             metadata_program_id.as_ref(),
                             mint_pubkey.as_ref(),
                         ];
-                        let (pda, _bump) = Pubkey::find_program_address(seeds, &metadata_program_id);
+                        let (pda, _bump) =
+                            Pubkey::find_program_address(seeds, &metadata_program_id);
                         let pda_bytes = match client.get_account_data(&pda) {
-                            Ok(data) => data, 
-                            Err(e) => {
-                                
+                            Ok(data) => data,
+                            Err(_e) => {
                                 println!("Heure: {}", datetime);
                                 println!("Mint: {}", first.mint);
                                 println!("Token Name: (sans métadonnées)");
@@ -70,22 +70,21 @@ pub async fn get_transaction_by_signature(
                         };
                         let pda_name = match Metadata::from_bytes(&pda_bytes) {
                             Ok(metadata) => metadata,
-                            Err(e) => {
+                            Err(_e) => {
                                 println!("Heure: {}", datetime);
                                 println!("Mint: {}", first.mint);
                                 println!("Token Name: (sans métadonnées)");
                                 return Ok(tx);
                             }
                         };
-                        println!("Token name: {}", pda_name.name);
                         println!("Heure: {}", datetime);
                         println!("Mint: {}", first.mint);
-
+                        println!("Token name: {}", pda_name.name);
                     }
                 }
             }
         }
-            // println!("Token's mint: {}", mint_address);
+        // println!("Token's mint: {}", mint_address);
     }
     Ok(tx)
 }
