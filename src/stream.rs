@@ -1,7 +1,6 @@
+use crate::fetch_data::get_transaction_by_signature;
 use solana_client::pubsub_client::PubsubClient;
 use solana_client::rpc_config::{RpcTransactionLogsConfig, RpcTransactionLogsFilter};
-use crate::fetch_data::get_transaction_by_signature;
-
 
 pub async fn fetch_token() -> Result<(), Box<dyn std::error::Error>> {
     let url = "wss://api.mainnet-beta.solana.com";
@@ -24,7 +23,7 @@ pub async fn fetch_token() -> Result<(), Box<dyn std::error::Error>> {
         {
             println!("=== Nouveau token détecté ===");
             let tx = get_transaction_by_signature(&log.value.signature).await;
-            println!("Transaction: {:?}", tx);
+            // println!("Transaction: {:?}", tx);
             // println!("Signature {}", get_transaction_by_signature(&log.value.signature)).await?;
         }
     }
