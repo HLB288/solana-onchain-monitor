@@ -9,7 +9,10 @@ mod stream;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _handle = tokio::spawn(async {
-        let _ = stream::fetch_token().await;
+        // let _ = stream::fetch_token().await;
+        if let Err(e) = stream::fetch_token().await {
+            println!("Stream error: {:}",e)
+        }
         println!("new token");
     });
     loop {
@@ -26,8 +29,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 let input = input.trim();
                 fetch_data::get_balance(&input).await?;
             }
-            // "1" => println!("Get wallet balance"),
-            // "2" => println!("Get wallet transactions"),
             "2" => {
                 println!("Entrez un id de transaction");
                 let mut input = String::new();

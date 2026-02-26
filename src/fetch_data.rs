@@ -1,3 +1,5 @@
+use crate::error::MonitorError;
+use crate::model::TokenInfo;
 use chrono::{DateTime, Utc};
 use mpl_token_metadata::accounts::Metadata;
 use solana_client::rpc_client::RpcClient;
@@ -7,8 +9,6 @@ use solana_pubkey::Pubkey;
 use solana_signature::Signature;
 use solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta;
 use solana_transaction_status::UiTransactionEncoding;
-use crate::model::TokenInfo;
-use crate::error::MonitorError;
 
 pub async fn get_balance(address: &str) -> Result<u64, Box<dyn std::error::Error>> {
     let client = RpcClient::new("https://api.mainnet-beta.solana.com");
@@ -31,7 +31,6 @@ pub async fn get_transaction(address: &str) -> Result<Vec<String>, Box<dyn std::
     Ok(results)
 }
 
-
 pub async fn get_transaction_by_signature(
     address: &str,
 ) -> Result<EncodedConfirmedTransactionWithStatusMeta, MonitorError> {
@@ -46,87 +45,46 @@ pub async fn get_transaction_by_signature(
 
     if let Some(time) = tx.block_time {
         let datetime = DateTime::<Utc>::from_timestamp(time, 0).unwrap();
-
-        // let mint_address = tx.transaction.meta.unwrap().post_token_balances[0].mint()?;
         if let Some(ref meta) = tx.transaction.meta {
             if let OptionSerializer::Some(balances) = &meta.post_token_balances {
-                if let Some(first) = balances.first() {
-                    if first.mint != "So11111111111111111111111111111111111111112" {
-                        let mint_pubkey = first.mint.parse::<Pubkey>()?;
-                        let metadata_program_id =
-                            "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s".parse::<Pubkey>()?;
-                        let seeds = &[
-                            b"metadata" as &[u8],
-                            metadata_program_id.as_ref(),
-                            mint_pubkey.as_ref(),
-                        ];
-                        let (pda, _bump) =
-                            Pubkey::find_program_address(seeds, &metadata_program_id);
-                        // let pda_bytes = match client.get_account_data(&pda) {
-                        //     Ok(data) => data,
-                        //     Err(_e) => {
-                        //         let token_info = TokenInfo::new(
-                        //             &datetime.to_string(),
-                        //             &first.mint, 
-                        //             &pda_name.name,
-                                    
-                        //         );
-                        //         println!("{:?}", token_info); 
-                        //         // println!("Heure: {}", datetime);
-                        //         // println!("Mint: {}", first.mint);
-                        //         println!("Token Name: (sans métadonnées)");
-                        //         return Ok(tx);
-                        //     }
-                        // };
-                        // let token_info = match Metadata::from_bytes(&pda_bytes) {
-                        //     Ok(metadata) => {
-                        //         let token_info = TokenInfo::new(
-                        //             &datetime.to_string(),
-                        //             &first.mint,
-                        //             &pda_name.name,
-                        //         );
-                        //         println!("{:?}", token_info); 
-                        //     },
-                        //     Err(_e) => {
-                              
-                        //         // println!("Heure: {}", datetime);
-                        //         // println!("Mint: {}", first.mint);
-                        //         println!("Token Name: (sans métadonnées)");
-                        //         return Ok(tx);
-                        //     }
-                        // };
-                        let pda_bytes = match client.get_account_data(&pda) {
-                            Ok(data) => data,
-                            Err(_) => {
-                                println!("sans métadonnées");
-                                return Ok(tx);
-                            }
-                        };
-                        let pda_name = match Metadata::from_bytes(&pda_bytes) {
-                            Ok(metadata) => metadata,
-                            Err(_) => {
-                                println!("sans métadonnées");
-                                return Ok(tx);
-                            }
-                        };
-                        // ICI on a pda_name disponible
-                        // println!("Token name: {}", pda_name.name);
-                        let token_info = TokenInfo::new(
-                            &datetime.to_string(),
-                            &first.mint, 
-                            &pda_name.name.trim_matches('\0'),
-                        );
-                        println!("{:?}", token_info);
-
-                        // println!("Heure: {}", datetime);
-                        // println!("Mint: {}", first.mint);
-                        // println!("Token name: {}", pda_name.name);
-                    }
+                if let Some(first) = balances
+                    .iter()
+                    .find(|b| b.mint != "So11111111111111111111111111111111111111112")
+                {
+                    let mint_pubkey = first.mint.parse::<Pubkey>()?;
+                    let metadata_program_id =
+                        "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s".parse::<Pubkey>()?;
+                    let seeds = &[
+                        b"metadata" as &[u8],
+                        metadata_program_id.as_ref(),
+                        mint_pubkey.as_ref(),
+                    ];
+                    let (pda, _bump) = Pubkey::find_program_address(seeds, &metadata_program_id);
+                    let pda_bytes = match client.get_account_data(&pda) {
+                        Ok(data) => data,
+                        Err(_) => {
+                            println!("sans métadonnées");
+                            return Ok(tx);
+                        }
+                    };
+                    let pda_name = match Metadata::from_bytes(&pda_bytes) {
+                        Ok(metadata) => metadata,
+                        Err(_) => {
+                            println!("sans métadonnées");
+                            return Ok(tx);
+                        }
+                    };
+                    let token_info = TokenInfo::new(
+                        &datetime.to_string(),
+                        &first.mint,
+                        &pda_name.name.trim_matches('\0'),
+                        &pda_name.symbol.trim_matches('\0'),
+                    );
+                    println!("{:?}", token_info);
                 }
             }
         }
-        // println!("Token's mint: {}", mint_address);
     }
+
     Ok(tx)
 }
- 
