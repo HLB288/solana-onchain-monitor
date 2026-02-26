@@ -22,7 +22,7 @@ pub async fn fetch_token() -> Result<(), Box<dyn std::error::Error>> {
             .any(|element| element.contains("InitializeMint"))
         {
             println!("=== Nouveau token détecté ===");
-            let tx = get_transaction_by_signature(&log.value.signature).await;
+            let _tx = get_transaction_by_signature(&log.value.signature).await;
             // println!("Transaction: {:?}", tx);
             // println!("Signature {}", get_transaction_by_signature(&log.value.signature)).await?;
         }

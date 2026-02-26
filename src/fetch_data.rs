@@ -7,6 +7,8 @@ use solana_pubkey::Pubkey;
 use solana_signature::Signature;
 use solana_transaction_status::EncodedConfirmedTransactionWithStatusMeta;
 use solana_transaction_status::UiTransactionEncoding;
+use crate::model::TokenInfo;
+use crate::error::MonitorError;
 
 pub async fn get_balance(address: &str) -> Result<u64, Box<dyn std::error::Error>> {
     let client = RpcClient::new("https://api.mainnet-beta.solana.com");
@@ -29,9 +31,10 @@ pub async fn get_transaction(address: &str) -> Result<Vec<String>, Box<dyn std::
     Ok(results)
 }
 
+
 pub async fn get_transaction_by_signature(
     address: &str,
-) -> Result<EncodedConfirmedTransactionWithStatusMeta, Box<dyn std::error::Error>> {
+) -> Result<EncodedConfirmedTransactionWithStatusMeta, MonitorError> {
     let client = RpcClient::new("https://api.mainnet-beta.solana.com");
     let signature = address.parse::<Signature>()?;
     let config = RpcTransactionConfig {
@@ -59,27 +62,65 @@ pub async fn get_transaction_by_signature(
                         ];
                         let (pda, _bump) =
                             Pubkey::find_program_address(seeds, &metadata_program_id);
+                        // let pda_bytes = match client.get_account_data(&pda) {
+                        //     Ok(data) => data,
+                        //     Err(_e) => {
+                        //         let token_info = TokenInfo::new(
+                        //             &datetime.to_string(),
+                        //             &first.mint, 
+                        //             &pda_name.name,
+                                    
+                        //         );
+                        //         println!("{:?}", token_info); 
+                        //         // println!("Heure: {}", datetime);
+                        //         // println!("Mint: {}", first.mint);
+                        //         println!("Token Name: (sans métadonnées)");
+                        //         return Ok(tx);
+                        //     }
+                        // };
+                        // let token_info = match Metadata::from_bytes(&pda_bytes) {
+                        //     Ok(metadata) => {
+                        //         let token_info = TokenInfo::new(
+                        //             &datetime.to_string(),
+                        //             &first.mint,
+                        //             &pda_name.name,
+                        //         );
+                        //         println!("{:?}", token_info); 
+                        //     },
+                        //     Err(_e) => {
+                              
+                        //         // println!("Heure: {}", datetime);
+                        //         // println!("Mint: {}", first.mint);
+                        //         println!("Token Name: (sans métadonnées)");
+                        //         return Ok(tx);
+                        //     }
+                        // };
                         let pda_bytes = match client.get_account_data(&pda) {
                             Ok(data) => data,
-                            Err(_e) => {
-                                println!("Heure: {}", datetime);
-                                println!("Mint: {}", first.mint);
-                                println!("Token Name: (sans métadonnées)");
+                            Err(_) => {
+                                println!("sans métadonnées");
                                 return Ok(tx);
                             }
                         };
                         let pda_name = match Metadata::from_bytes(&pda_bytes) {
                             Ok(metadata) => metadata,
-                            Err(_e) => {
-                                println!("Heure: {}", datetime);
-                                println!("Mint: {}", first.mint);
-                                println!("Token Name: (sans métadonnées)");
+                            Err(_) => {
+                                println!("sans métadonnées");
                                 return Ok(tx);
                             }
                         };
-                        println!("Heure: {}", datetime);
-                        println!("Mint: {}", first.mint);
-                        println!("Token name: {}", pda_name.name);
+                        // ICI on a pda_name disponible
+                        // println!("Token name: {}", pda_name.name);
+                        let token_info = TokenInfo::new(
+                            &datetime.to_string(),
+                            &first.mint, 
+                            &pda_name.name.trim_matches('\0'),
+                        );
+                        println!("{:?}", token_info);
+
+                        // println!("Heure: {}", datetime);
+                        // println!("Mint: {}", first.mint);
+                        // println!("Token name: {}", pda_name.name);
                     }
                 }
             }
@@ -88,3 +129,4 @@ pub async fn get_transaction_by_signature(
     }
     Ok(tx)
 }
+ 
