@@ -14,3 +14,7 @@ solana-signature = "3.3.0"
 solana-transaction-status = "3.1.9"
 thiserror = "2.0.18"
 tokio = { version = "1.49.0", features = ["full"] }
+
+[lib]
+name = "test_fetch_solana_data"
+path = "src/lib.rs"

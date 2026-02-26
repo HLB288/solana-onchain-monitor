@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _handle = tokio::spawn(async {
         // let _ = stream::fetch_token().await;
         if let Err(e) = stream::fetch_token().await {
-            println!("Stream error: {:}",e)
+            println!("Stream error: {:}", e)
         }
         println!("new token");
     });
