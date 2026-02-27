@@ -547,6 +547,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "client"
+version = "0.1.0"
+
+[[package]]
 name = "combine"
 version = "3.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2918,6 +2922,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "server"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "mpl-token-metadata",
+ "serde",
+ "shared",
+ "solana-client",
+ "solana-program 4.0.0",
+ "solana-pubkey 4.1.0",
+ "solana-signature",
+ "solana-transaction-status",
+ "thiserror 2.0.18",
+ "tokio",
+]
+
+[[package]]
 name = "sha1"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2967,6 +2988,10 @@ dependencies = [
  "digest 0.10.7",
  "keccak",
 ]
+
+[[package]]
+name = "shared"
+version = "0.1.0"
 
 [[package]]
 name = "shlex"
@@ -5856,22 +5881,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.116",
-]
-
-[[package]]
-name = "test-fetch-solana-data"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "mpl-token-metadata",
- "serde",
- "solana-client",
- "solana-program 4.0.0",
- "solana-pubkey 4.1.0",
- "solana-signature",
- "solana-transaction-status",
- "thiserror 2.0.18",
- "tokio",
 ]
 
 [[package]]

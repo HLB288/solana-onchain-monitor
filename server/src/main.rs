@@ -1,6 +1,7 @@
+use shared::model;
+
 mod error;
 mod fetch_data;
-mod model;
 mod stream;
 
 // use std::io::stdin;
